@@ -24,7 +24,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
                         // to allow run sql queries in main thread of the ui .. may lock the ui ..
-                        //.allowMainThreadQueries()
+                        .allowMainThreadQueries()
                         .build();
             }
         }
