@@ -16,14 +16,18 @@
 
 package com.example.android.todolist;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 
 import com.example.android.todolist.database.AppDatabase;
@@ -85,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                     public void run() {
                         final int position = viewHolder.getAdapterPosition();
                         mDb.taskDao().deleteTask(mAdapter.getTasks().get(position));
-                        retrieveTasks();
                     }
                 });
             }
@@ -106,19 +109,19 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                 startActivity(addTaskIntent);
             }
         });
+
+        retrieveTasks();
     }
 
     private void retrieveTasks() {
-        AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+
+        Log.d("fsfsfsfs","query database");
+        final LiveData<List<TaskEntry>> list = mDb.taskDao().loadAllTasks();
+        list.observe(this, new Observer<List<TaskEntry>>() {
             @Override
-            public void run() {
-                final List<TaskEntry> list = mDb.taskDao().loadAllTasks();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.setTasks(list);
-                    }
-                });
+            public void onChanged(@Nullable List<TaskEntry> taskEntries) {
+                Log.d("fsfsfsfs","change in database");
+                mAdapter.setTasks(taskEntries);
             }
         });
     }
@@ -131,10 +134,4 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
         startActivity(intent);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        retrieveTasks();
-
-    }
 }
